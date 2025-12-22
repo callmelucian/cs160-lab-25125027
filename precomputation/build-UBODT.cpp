@@ -17,6 +17,7 @@ const int thres = 75;
 double dist[mn]; // store the distance of each node
 bool vist[mn]; // check if a node is visited
 int trace[mn]; // as explain in documentation
+vector<int> toReset;
 
 vector<int> runDijkstra (int source, const Graph& G) {
     using item = pair<double,int>;
@@ -28,25 +29,29 @@ vector<int> runDijkstra (int source, const Graph& G) {
         int u = pq.top().second; pq.pop();
         if (vist[u]) continue;
         if (u != source) nodeList.push_back(u);
-        vist[u] = true;
+        vist[u] = true, toReset.push_back(u);
 
         for (int edgeID : G.adj[u]) {
             int v = G.edges[edgeID].to;
             double weight = G.edges[edgeID].length();
             if (dist[u] + weight < dist[v]) {
+                toReset.push_back(v);
                 dist[v] = dist[u] + weight, trace[v] = u;
                 pq.emplace(dist[v], v);
             }
         }
     }
+    if (nodeList.size() < thres) cout << "Node " << source << " is isolated" << endl;
+    while (nodeList.size() < thres) nodeList.push_back(0);
     return nodeList;
 }
 
-void prepareBinaryFile (const vector<int> &nodeList, string fileName) {
+void prepareBinaryFile (const vector<int> &nodeList, string fileName, int source) {
     ofstream fout(fileName, ios::binary | ios::app);
     if (fout.is_open()) {
         if (nodeList.size() != thres) {
             cout << "Size of nodeList is not consistent!\n";
+            cout << "Found " << nodeList.size() << " on current source " << source << "\n";
             exit(0);
         }
         for (int u : nodeList)
@@ -55,11 +60,8 @@ void prepareBinaryFile (const vector<int> &nodeList, string fileName) {
     fout.close();
 }
 
-void resetNode (int u) { dist[u] = oo, trace[u] = 0, vist[u] = false; }
-
-void reinitialize (const vector<int> &nodeList, int source) {
-    for (int u : nodeList) resetNode(u);
-    resetNode(source);
+void resetNode (int u) {
+    dist[u] = oo, trace[u] = 0, vist[u] = false;
 }
 
 Graph readGraph (string fileName, string mode) {
@@ -97,11 +99,16 @@ int main()
 
     cout << "Running Dijkstra..." << endl;
     for (int i = 1; i <= G.size(); i++) resetNode(i);
-    vector<int> nodeList = runDijkstra(100, G);
+    
+    for (int source = 1; source <= G.size(); source++) {
+        if (source % 2000 == 0) {
+            cout << "Checkpoint: " << source << "-th node..." << endl;
+        }
+        vector<int> nodeList = runDijkstra(source, G);
+        prepareBinaryFile(nodeList, "UBODT.bin", source);
 
-    cout << "Found " << nodeList.size() << endl;
-    for (int u : nodeList) {
-        cout << "found node " << u << " " << dist[u] << " " << trace[u] << "\n";
+        for (int u : toReset) resetNode(u);
+        resetNode(source), toReset.clear();
     }
 
 
