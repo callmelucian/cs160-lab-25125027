@@ -96,11 +96,38 @@ public:
         for (int i = 1; i < container.size(); i++)
             totalLength += euclideDist(container[i - 1], container[i]);
     }
+    Polyline (const vector<Point> &container, const double &length) :
+        container(container), totalLength(length) {}
 
     // Quick access but protect data
     const Point& operator[] (int i) const { return container[i]; }
+    const Point& front() const { return container[0]; }
+    const Point& back() const { return container[size() - 1]; }
     int size() const { return container.size(); }
     double length() const { return totalLength; }
+
+    // Reverse
+    Polyline returnReverse() const {
+        vector<Point> vec = container;
+        reverse(vec.begin(), vec.end());
+        return Polyline(vec, totalLength);
+    }
+    void inlineReverse() {
+        reverse(container.begin(), container.end());
+    }
+
+    // Concatenate 2 polylines
+    void operator += (const Polyline &o) {
+        if (size() && o.size() && back() == o.front()) pop();
+        totalLength += o.length();
+        if (size() && o.size()) totalLength += euclideDist(back(), o.front());
+        container.insert(container.end(), o.container.begin(), o.container.end());
+    }
+    Polyline operator+ (const Polyline &o) const {
+        Polyline curr = (*this);
+        curr += o;
+        return curr;
+    }
     
     // The correct modification function
     void modify (int i, const Point &newPoint) {
