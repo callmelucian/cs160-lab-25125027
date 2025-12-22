@@ -36,7 +36,7 @@ def loadMap (places):
     nodes['compressed_id'] = nodes.index.map(node_id_map)
 
     # Drop excessive columns
-    edges = edges[['u', 'v', 'oneway', 'maxspeed', 'geometry']].reset_index()
+    edges = edges[['u_compressed', 'v_compressed', 'oneway', 'maxspeed', 'geometry']].reset_index()
     nodes = nodes[['y', 'x', 'compressed_id', 'geometry']].reset_index()
 
     # Report graph size

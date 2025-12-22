@@ -1,4 +1,5 @@
 #include <bits/stdc++.h>
+#include "../utility/graph.hpp"
 using namespace std;
 
 using ll = long long;
@@ -11,16 +12,6 @@ using tpl = tuple<int,int,int>;
 #define filter(a) a.erase(unique(all(a)), a.end())
 
 const int mn = 2e5 + 5;
-
-struct Edge {
-    int from, to;
-    double length;
-};
-
-struct Graph {
-    vector<vector<int>> adj;
-    vector<Edge> edges;
-};
 
 const double oo = 1e9;
 const int mn = 2e5 + 5;
@@ -42,7 +33,7 @@ vector<int> runDijkstra (int source, int N, const Graph& G) {
 
         for (int edgeID : G.adj[u]) {
             int v = G.edges[edgeID].to;
-            double weight = G.edges[edgeID].length;
+            double weight = G.edges[edgeID].length();
             if (dist[u] + weight < dist[v]) {
                 dist[v] = dist[u] + weight, trace[v] = u;
                 pq.emplace(dist[v], v);
