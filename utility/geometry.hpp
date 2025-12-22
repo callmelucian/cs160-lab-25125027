@@ -193,5 +193,6 @@ public:
         ouf << "<Polyline of length " << pll.length() << ": ";
         for (int i = 0; i < pll.size(); i++) cout << pll[i] << " ";
         ouf << "/>";
+        return ouf;
     }
 };
