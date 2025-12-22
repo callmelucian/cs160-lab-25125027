@@ -18,6 +18,7 @@ double dist[mn]; // store the distance of each node
 bool vist[mn]; // check if a node is visited
 int trace[mn]; // as explain in documentation
 vector<int> toReset;
+int countIsolated;
 
 vector<int> runDijkstra (int source, const Graph& G) {
     using item = pair<double,int>;
@@ -36,12 +37,13 @@ vector<int> runDijkstra (int source, const Graph& G) {
             double weight = G.edges[edgeID].length();
             if (dist[u] + weight < dist[v]) {
                 toReset.push_back(v);
-                dist[v] = dist[u] + weight, trace[v] = u;
+                dist[v] = dist[u] + weight, trace[v] = edgeID;
                 pq.emplace(dist[v], v);
             }
         }
     }
-    if (nodeList.size() < thres) cout << "Node " << source << " is isolated" << endl;
+    if (nodeList.size() < thres)
+        cout << "Node " << source << " is isolated" << endl, countIsolated++;
     while (nodeList.size() < thres) nodeList.push_back(0);
     return nodeList;
 }
@@ -110,6 +112,8 @@ int main()
         for (int u : toReset) resetNode(u);
         resetNode(source), toReset.clear();
     }
+
+    cout << "Done with " << countIsolated << " isolated nodes" << endl;
 
 
     return 0;

@@ -161,6 +161,17 @@ public:
     }
     void clear() { container.clear(), totalLength = 0.0; }
 
+    // Distance from a Point to a Polyline
+    friend double euclideDist (const Polyline &pll, const Point &pt) {
+        if (!pll.size()) return 0.0;
+        double ans = oo;
+        for (int i = 1; i < pll.size(); i++) {
+            Segment s(pll[i - 1], pll[i]);
+            ans = min(ans, euclideDist(s, pt));
+        }
+        return ans;
+    }
+
     // Extract a portion of the polyline using the projection of a Point to itself
     Polyline extract (const Point &p, bool toEnd) {
         if (!size()) return Polyline();
