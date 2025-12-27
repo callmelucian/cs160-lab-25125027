@@ -25,9 +25,19 @@ namespace spatial {
 };
 
 namespace temporal {
-    double score() { return 1.0; }
+    double score (const Graph &G, const CandidatePoint &from, const CandidatePoint &to) {
+        double timeLimit = fastTravelTime(G, from, to);
+        double actualTime = to.recordTime - from.recordTime;
+        return 1.0;
+    }
+
+    /**
+     * TODO: use exp(- square(actualTime - timeLimit) / (2 * square(variance)))
+     * but there is 2 different variance for each case, I'm expecting something like
+     * variance is greater if actualTime is greater than timeLimit
+     */
 };
 
 double SPFunction (const Graph &G, const CandidatePoint &from, const CandidatePoint &to) {
-    return spatial::score(G, from, to) * temporal::score();
+    return spatial::score(G, from, to) * temporal::score(G, from, to);
 }

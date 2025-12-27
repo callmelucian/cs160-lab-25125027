@@ -112,3 +112,18 @@ Polyline shortestPath (const Graph &G, const CandidatePoint &from, const Candida
     // return path
     return finalPath;
 }
+
+double fastTravelTime (const Graph &G, const CandidatePoint &from, const CandidatePoint &to) {
+    // calculate the list of edge IDs
+    int fromNode = G.edges[from.assocEdge].to;
+    int toNode = G.edges[to.assocEdge].from;
+    vector<int> edgeIDs = dijkstra(G, fromNode, toNode, UBODTPath);
+    if (edgeIDs.empty() && fromNode != toNode) return oo;
+    double res = 0.0;
+
+    res += G.edges[from.assocEdge].polyline.extract(from.gps, 1).length() / G.edges[from.assocEdge].speedLimit;
+    for (int eID : edgeIDs) res += G.edges[eID].length() / G.edges[eID].speedLimit;
+    res += G.edges[to.assocEdge].polyline.extract(to.gps, 0).length() / G.edges[to.assocEdge].speedLimit;
+
+    return res;
+}
