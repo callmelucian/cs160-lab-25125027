@@ -173,7 +173,7 @@ public:
     }
 
     // Extract a portion of the polyline using the projection of a Point to itself
-    Polyline extract (const Point &p, bool toEnd) {
+    Polyline extract (const Point &p, bool toEnd) const {
         if (!size()) return Polyline();
 
         // find closest segemet

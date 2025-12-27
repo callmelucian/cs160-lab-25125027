@@ -2,7 +2,7 @@
 #include "geometry.hpp"
 using namespace std;
 
-mt19937 rng(chrono::high_resolution_clock::now().time_since_epoch().count());
+mt19937 rng(21); // shuffling the edge IDs must be consistent
 
 // A DIRECTED EDGE STRUCT
 struct Edge {
@@ -75,3 +75,28 @@ struct Graph {
     int size() const { return graphSize; }
     int edgeCount() const { return edges.size(); }
 };
+
+Graph readGraph (string fileName, string mode) {
+    if (mode == "txt") {
+        cout << "Start reading TXT file..." << endl;
+        ifstream fin(fileName);
+        int N, M; fin >> N >> M;
+        vector<Edge> edges(M);
+        vector<bool> isOneway(M);
+
+        for (int i = 0; i < M; i++) {
+            int u, v, oneway; double speedLimit;
+            fin >> u >> v >> speedLimit >> oneway;
+
+            int polylength; fin >> polylength;
+            vector<Point> pll(polylength);
+            for (Point &it : pll) fin >> it;
+
+            edges[i] = Edge(u, v, speedLimit, pll);
+            isOneway[i] = oneway;
+        }
+        cout << "Building graph..." << endl;
+        return Graph(N, edges, isOneway);
+    }
+    else return Graph();
+}

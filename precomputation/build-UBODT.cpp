@@ -66,37 +66,12 @@ void resetNode (int u) {
     dist[u] = oo, trace[u] = 0, vist[u] = false;
 }
 
-Graph readGraph (string fileName, string mode) {
-    if (mode == "txt") {
-        cout << "Start reading TXT file..." << endl;
-        ifstream fin(fileName);
-        int N, M; fin >> N >> M;
-        vector<Edge> edges(M);
-        vector<bool> isOneway(M);
-
-        for (int i = 0; i < M; i++) {
-            int u, v, oneway; double speedLimit;
-            fin >> u >> v >> speedLimit >> oneway;
-
-            int polylength; fin >> polylength;
-            vector<Point> pll(polylength);
-            for (Point &it : pll) fin >> it;
-
-            edges[i] = Edge(u, v, speedLimit, pll);
-            isOneway[i] = oneway;
-        }
-        cout << "Building graph..." << endl;
-        return Graph(N, edges, isOneway);
-    }
-    else return Graph();
-}
-
 int main()
 {
     ios::sync_with_stdio(0);
     cin.tie(0);
 
-    Graph G = readGraph("../build/network.txt", "txt");
+    Graph G = readGraph("../evaluation/network.txt", "txt");
     cout << "Received graph with " << G.size() << " nodes and " << G.edgeCount() << " edges" << endl;
 
     cout << "Running Dijkstra..." << endl;
