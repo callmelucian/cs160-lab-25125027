@@ -1,5 +1,5 @@
 #include <bits/stdc++.h>
-#include "../../utility/helper-algorithms.hpp"
+#include "utility/helper-algorithms.hpp"
 using namespace std;
 
 using ll = long long;
@@ -20,11 +20,11 @@ int main()
 
     /// Read input
     cout << "Reading input graph..." << endl;
-    Graph G = readGraph("../helper-files/network.txt", "txt");
+    Graph G = readGraph("evaluation/helper-files/network.txt", "txt");
     cout << "Done!" << endl;
 
     cout << "Reading raw trajectory..." << endl;
-    vector<CandidatePoint> trajectory = readTrajectory("../helper-files/raw-path.txt", "txt");
+    vector<CandidatePoint> trajectory = readTrajectory("evaluation/helper-files/raw-path.txt", "txt");
     cout << "Done!" << endl;
 
     /// Find the candidate list
@@ -48,7 +48,7 @@ int main()
 
     /// Output the geometry of the optimal path
     cout << "Writing the geometry of the optimal path..." << endl;
-    writeMatchedTrajectory("../helper-files/matched-path.txt", "txt", ans);
+    writeMatchedTrajectory("evaluation/helper-files/matched-path.txt", "txt", ans);
     cout << "Done!" << endl;
 
     return 0;

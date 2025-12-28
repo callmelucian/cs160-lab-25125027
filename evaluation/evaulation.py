@@ -118,7 +118,7 @@ print('Evaluating...')
 
 matchedGPS = evaluate('./evaluation/helper-files/raw-path.txt',
                       './evaluation/helper-files/matched-path.txt',
-                      './evaluation/map-matching-new/map-matching-new.exe',
+                      './map-matching-new.exe',
                       rawGPS, 1)
 
 print('Visualizing...')
