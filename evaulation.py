@@ -7,6 +7,7 @@ from tqdm import tqdm
 import numpy as np
 import subprocess
 import struct
+from data import utility as util
 
 # EXPORT GRAPH AS TEXT FILE
 def exportGraphText (filePath, nodes, edges):
@@ -69,7 +70,7 @@ def exportTrajectories(rawFile, rawGPS, index):
 
 
 # EVALUATE
-def evaluate(rawFile, outputFile, mainFile, rawGPS, maxIter = 10):
+def evaluate(rawFile, outputFile, mainFile, rawGPS, maxIter):
     # Iterate through each trajectory
     numTrajectories = len(rawGPS)
     print(f'Starting evaluation of {numTrajectories} trajectories...\n')
@@ -105,14 +106,14 @@ def calculateMetrics (matched, true):
     frechet = similaritymeasures.frechet_dist(matchedData, trueData)
     dtw, _ = similaritymeasures.dtw(matchedData, trueData)
     dtwNormalized = dtw / (len(matchedData) + len(trueData))
-    area = similaritymeasures.area_between_two_curves(matchedData, trueData)
-    avgLength = (getArcLength(matchedData) + getArcLength(trueData)) / 2
-    areaNormalized = area / avgLength
-    return frechet, dtwNormalized, areaNormalized
+    # area = similaritymeasures.area_between_two_curves(matchedData, trueData)
+    # avgLength = (getArcLength(matchedData) + getArcLength(trueData)) / 2
+    # areaNormalized = area / avgLength
+    return frechet, dtwNormalized
 
 
 def printList (nparr):
-    print(f'- SUM: {np.sum(nparr) / len(nparr)}')
+    print(f'- AVG: {np.sum(nparr) / len(nparr)}')
     print(f'- MIN: {np.min(nparr)}')
     print(f'- MAX: {np.max(nparr)}')
 
@@ -120,26 +121,27 @@ def printList (nparr):
 def compare (matchedGPS, trueGPS):
     frechetList, DTWList, areaList = [], [], []
     for matchedLine, trueLine in zip(matchedGPS['geometry'], trueGPS['geometry']):
-        frechet, dtw, area = calculateMetrics(matchedLine, trueLine)
+        frechet, dtw = calculateMetrics(matchedLine, trueLine)
         frechetList.append(frechet)
         DTWList.append(dtw)
-        areaList.append(area)
+        # areaList.append(area)
 
     print('Frechet distance:')
     printList(np.array(frechetList))
     print('Dynamic time warping (normalized):')
     printList(np.array(DTWList))
-    print('Area (normalized):')
-    printList(np.array(areaList))
+    # print('Area (normalized):')
+    # printList(np.array(areaList))
 
 
 # VISUALIZE THE FIRST RESULT ENTRY
-def visualizeFirst (edges, matchedGPS, trueGPS):
-    matchedGPS, trueGPS = matchedGPS[:1], trueGPS[:1]
+def visualizeFirst (edges, matchedGPS, trueGPS, rawGPS):
+    matchedGPS, trueGPS, rawGPS = matchedGPS[:1], trueGPS[:1], rawGPS[:1]
     fig, ax = plt.subplots(1, 1, figsize=(20, 24))
     edges.plot(ax = ax, color = 'lightgray', linewidth = 1, label = 'Road edges', zorder = 1)
     trueGPS.plot(ax = ax, color = 'green', linewidth = 4, label = 'True GPS (provided data)', zorder = 2)
-    matchedGPS.plot(ax = ax, color = 'red', linewidth = 2, label = 'Matched GPS', zorder = 3)
+    rawGPS.plot(ax = ax, color = 'orange', linewidth = 2, label = 'Raw GPS (provided data)', zorder = 3)
+    matchedGPS.plot(ax = ax, color = 'red', linewidth = 2, label = 'Matched GPS', zorder = 4)
 
     minx, miny, maxx, maxy = trueGPS.total_bounds
     buffer = 100
@@ -147,7 +149,7 @@ def visualizeFirst (edges, matchedGPS, trueGPS):
     ax.set_ylim(miny - buffer, maxy + buffer)
 
     ax.set_title('Visualize Map Matching Result')
-    ax.legend(loc='lower left')
+    ax.legend(loc='lower right')
     plt.show()
 
 
@@ -164,10 +166,11 @@ print('Evaluating...')
 matchedGPS = evaluate('./evaluation/raw-path.txt',
                       './evaluation/matched-path.txt',
                       './map-matching-new.exe',
-                      rawGPS, 1)
+                      rawGPS, 1000)
+util.saveGPKG(matchedGPS, './evaluation/matched-path.gpkg')
 
 print('Visualizing...')
-visualizeFirst(edges, matchedGPS, trueGPS)
+visualizeFirst(edges, matchedGPS, trueGPS, rawGPS)
 
 # print(f'Found this matched GPS {len(matchedGPS)}')
 # print(matchedGPS)

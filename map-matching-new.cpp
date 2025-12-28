@@ -11,7 +11,7 @@ using tpl = tuple<int,int,int>;
 #define all(a) a.begin(), a.end()
 #define filter(a) a.erase(unique(all(a)), a.end())
 
-const int MAXCANDIDATE = 8;
+const int MAXCANDIDATE = 16;
 
 namespace timing {
     auto start = chrono::high_resolution_clock::now();
