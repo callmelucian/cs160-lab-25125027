@@ -13,60 +13,65 @@ using tpl = tuple<int,int,int>;
 
 const int MAXCANDIDATE = 8;
 
+namespace timing {
+    auto start = chrono::high_resolution_clock::now();
+    auto currentFlag = chrono::high_resolution_clock::now();
+
+    double curTime() { // may lead to an approximately 0.01s offset
+        auto cur = chrono::high_resolution_clock::now();
+        chrono::duration<double> elapsed = cur - currentFlag;
+        return elapsed.count();
+    }
+
+    double totalTime() {
+        auto cur = chrono::high_resolution_clock::now();
+        chrono::duration<double> elapsed = cur - start;
+        return elapsed.count();
+    }
+
+    void flag() { currentFlag = chrono::high_resolution_clock::now(); }
+};
+
 int main()
 {
     ios::sync_with_stdio(0);
     cin.tie(0);
 
     /// Read input
-    cout << "Reading input graph..." << endl;
-    Graph G = readGraph("evaluation/helper-files/network.txt", "txt");
-    cout << "Done!" << endl;
-
-    cout << "Reading raw trajectory..." << endl;
-    vector<CandidatePoint> trajectory = readTrajectory("evaluation/helper-files/raw-path.txt", "txt");
-    cout << "Done!" << endl;
-
+    cout << "Reading input graph..." << endl, timing::flag();
+    Graph G = readGraph("evaluation/network.bin", "bin");
+    cout << "Done in " << timing::curTime() << " seconds" << endl;
+    cout << "Receive graph with " << G.size() << " nodes and " << G.edgeCount() << " edges\n";
+    
+    cout << "Reading raw trajectory..." << endl, timing::flag();
+    vector<CandidatePoint> trajectory = readTrajectory("evaluation/raw-path.txt", "txt");
+    cout << "Done in " << timing::curTime() << " seconds" << endl;
+    
     /// Find the candidate list
-    cout << "Computing candidate list..." << endl;
+    cout << "Computing candidate list..." << endl, timing::flag();
     vector<vector<CandidatePoint>> candList = findCandidates(G, trajectory, MAXCANDIDATE);
-    cout << "Done!" << endl;
-
-    // cout << "\n";
-    // for (int i = 0; i < candList.size(); i++) {
-    //     cout << "Layer " << i << ": ";
-    //     for (CandidatePoint pt : candList[i]) cout << "(" << pt.gps << "/" << pt.assocEdge << ") ";
-    //     cout << "\n";
-    // }
-    // cout << "\n";
-
+    cout << "Done in " << timing::curTime() << " seconds" << endl;
+    
     /// Find the optimal path on the virtual graph
-    cout << "Finding optimal path..." << endl;
+    cout << "Finding optimal path..." << endl, timing::flag();
     vector<int> optimalPath = bestScoringPath(G, candList);
-    cout << "Done!" << endl;
-
-    // cout << "Optimal path: ";
-    // for (int u : optimalPath) cout << u << " ";
-    // cout << "\n";
+    cout << "Done in " << timing::curTime() << " seconds" << endl;
 
     /// Find the geometry of the optimal path
-    cout << "Finding the geometry of the optimal path..." << endl;
+    cout << "Finding the geometry of the optimal path..." << endl, timing::flag();
     Polyline ans;
     for (int i = 0; i + 1 < optimalPath.size(); i++) {
         CandidatePoint prv = candList[i][optimalPath[i]], nxt = candList[i + 1][optimalPath[i + 1]];
-        ans += shortestPath(G, prv, nxt);
-        // vector<int> edgeIDs = dijkstra(G, G.edges[prv.assocEdge].to, G.edges[nxt.assocEdge].from);
-        // cout << "Path " << i + 1 << ": ";
-        // for (int u : edgeIDs) cout << u << " ";
-        // cout << "\n";
-        
+        ans += shortestPath(G, prv, nxt);        
     }
-    cout << "Done!" << endl;
+    cout << "Done in " << timing::curTime() << " seconds" << endl;
 
     /// Output the geometry of the optimal path
-    cout << "Writing the geometry of the optimal path..." << endl;
-    writeMatchedTrajectory("evaluation/helper-files/matched-path.txt", "txt", ans);
-    cout << "Done!" << endl;
+    cout << "Writing the geometry of the optimal path..." << endl, timing::flag();
+    writeMatchedTrajectory("evaluation/matched-path.txt", "txt", ans);
+    cout << "Done in " << timing::curTime() << " seconds" << endl;
+
+    cout << "Program done in " << timing::totalTime() << " seconds" << endl;
 
     return 0;
 }

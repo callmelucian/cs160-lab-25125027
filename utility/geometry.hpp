@@ -1,7 +1,6 @@
 /**
  * DESCRIPTION: THIS HEADER FILE CONTAINS BASIC GEOMETRIC DATA STRUCTURES
  * NOTE: THIS FILE IS IMPLEMENTED BY MYSELF
- * TODO: RE-IMPLEMENT STRUCT SEGMENT SINCE I FEEL SUSPICIOUS ABOUT IT
  */
 
 #include <bits/stdc++.h>
@@ -9,7 +8,7 @@ using namespace std;
 
 // CONSTANTS
 const double eps = 1e-6;
-const double oo = 1e9;
+const double oo = 1e16;
 
 // HELPER FUNCTIONS
 long double squared (long double a) { return a * a; }
@@ -68,7 +67,18 @@ struct Segment {
             double denom = sqrt(d.A * d.A + d.B * d.B);
             return numer / denom;
         }
-        else return min(euclideDist(p, d.a), euclideDist(p, d.b));
+        return min(euclideDist(p, d.a), euclideDist(p, d.b));
+    }
+
+    // Find the squared euclide distance between a Segment and a Point
+    // Use this function when possible since calculating square-root is slow
+    friend double squaredDist (const Segment &d, const Point &p) {
+        if (dot(d.b - d.a, p - d.b) <= 0 && dot(d.a - d.b, p - d.a) <= 0) { // projection is on the line
+            double numer = squared(d.A * p.x + d.B * p.y + d.C);
+            double denom = d.A * d.A + d.B * d.B;
+            return numer / denom;
+        }
+        return min(squaredDist(p, d.a), squaredDist(p, d.b));
     }
 
     // Find the project between a Semgent and a Point
@@ -168,6 +178,17 @@ public:
         for (int i = 1; i < pll.size(); i++) {
             Segment s(pll[i - 1], pll[i]);
             ans = min(ans, euclideDist(s, pt));
+        }
+        return ans;
+    }
+
+    // Squared distance from a Point to a Polyline
+    friend double squaredDist (const Polyline &pll, const Point &pt) {
+        if (!pll.size()) return 0.0;
+        double ans = oo;
+        for (int i = 1; i < pll.size(); i++) {
+            Segment s(pll[i - 1], pll[i]);
+            ans = min(ans, squaredDist(s, pt));
         }
         return ans;
     }

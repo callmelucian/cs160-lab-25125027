@@ -76,9 +76,12 @@ struct Graph {
     int edgeCount() const { return edges.size(); }
 };
 
+/// @brief Utility function to read a graph in 2 modes
+/// @param fileName Relative path to graph file location
+/// @param mode For now, I only accept "txt" and "bin" mode, binary files are recommended since they are generally faster
+/// @return Return a Graph structure corresponding to the given file
 Graph readGraph (string fileName, string mode) {
     if (mode == "txt") {
-        // cout << "Start reading network..." << endl;
         ifstream fin(fileName);
         int N, M; fin >> N >> M;
         vector<Edge> edges(M);
@@ -96,7 +99,32 @@ Graph readGraph (string fileName, string mode) {
             isOneway[i] = oneway;
         }
         fin.close();
-        // cout << "Building graph..." << endl;
+        return Graph(N, edges, isOneway);
+    }
+    else if (mode == "bin") {
+        ifstream fin(fileName, ios::binary);
+        int N; fin.read((char*)&N, 4); // nodes count
+        int M; fin.read((char*)&M, 4); // edges count
+        vector<Edge> edges(M);
+        vector<bool> isOneway(M);
+
+        for (int i = 0; i < M; i++) {
+            int u; fin.read((char*)&u, 4); // edge endpoint
+            int v; fin.read((char*)&v, 4); // edge endpoint
+            double speedLimit; fin.read((char*)&speedLimit, 8); // speed-limit
+            int oneway; fin.read((char*)&oneway, 4); // is-oneway flag
+
+            int polylength; fin.read((char*)&polylength, 4); // poly-line length
+            vector<Point> pll(polylength);
+            for (Point &it : pll) {
+                fin.read((char*)&it.x, 8); // point x-coordinate
+                fin.read((char*)&it.y, 8); // point y-coordinate
+            }
+
+            edges[i] = Edge(u, v, speedLimit * 1000.0 / 60.0, pll);
+            isOneway[i] = oneway;
+        }
+        fin.close();
         return Graph(N, edges, isOneway);
     }
     else return Graph();

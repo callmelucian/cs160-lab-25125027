@@ -61,7 +61,7 @@ vector<int> searchXBest (const Graph &G, const Point &p, int THRESHOLD) {
 
     // start sampling rounds
     for (int i = 0; i < G.edgeCount(); i++) {
-        double curDist = euclideDist(G.edges[i].polyline, p);
+        double curDist = squaredDist(G.edges[i].polyline, p); // used squared distance for faster calculations
         if (curDist <= currentBound) waitLine.emplace_back(curDist, i);
 
         // re-calculate wait-line, shrink to THRESHOLD elements

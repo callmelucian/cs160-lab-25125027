@@ -1,14 +1,15 @@
-import similaritymeasures
-import numpy as np
 from shapely.geometry import LineString, Point
 import matplotlib.pyplot as plt
-from tqdm import tqdm
-import subprocess
-import os
+import similaritymeasures
+from pathlib import Path
 import geopandas as gpd
+from tqdm import tqdm
+import numpy as np
+import subprocess
+import struct
 
-# EXPORT GRAPH
-def exportGraph (filePath, nodes, edges):
+# EXPORT GRAPH AS TEXT FILE
+def exportGraphText (filePath, nodes, edges):
     with open(filePath, 'w') as f:
         N, M = len(nodes), len(edges)
         f.write(f'{N} {M}\n')
@@ -23,6 +24,37 @@ def exportGraph (filePath, nodes, edges):
             f.write(f"{u} {v} {limit:.6f} {isOneway}\n")
             f.write(f"{len(coords)} {coords_string}\n")
 
+
+# EXPORT GRAPH AS BINARY FILE
+def exportGraphBinary (filePath, nodes, edges):
+    with open(filePath, 'wb') as f:
+        N, M = len(nodes), len(edges)
+        f.write(struct.pack('ii', N, M))
+
+        for index, row in tqdm(edges.iterrows(), total=M):
+            # Data preparation
+            u, v = int(row['u_compressed'] + 1), int(row['v_compressed'] + 1)
+            limit, isOneway = row['maxspeed'], int(row['oneway'])
+            coords = list(row['geometry'].coords)
+            num_coords = len(coords)
+
+            f.write(struct.pack('iidi', u, v, limit, isOneway))
+            f.write(struct.pack('i', num_coords))
+            for point in coords:
+                f.write(struct.pack('dd', point[0], point[1]))
+
+
+# EXPORT GRAPH FUNCTION
+def exportGraph (filePath, nodes, edges):
+    ext = Path(filePath).suffix
+    if (ext == '.txt'):
+        exportGraphText(filePath, nodes, edges)
+    elif (ext == '.bin'):
+        exportGraphBinary(filePath, nodes, edges)
+    else:
+        raise ValueError(f'File type {ext} is not supported')
+
+
 # EXPORT TRAJECTORIES
 def exportTrajectories(rawFile, rawGPS, index):
     rawRow = rawGPS.iloc[index]
@@ -35,6 +67,7 @@ def exportTrajectories(rawFile, rawGPS, index):
             timeStamp += 30
             f.write(f"{point[0]} {point[1]} {timeStamp}\n")
 
+
 # EVALUATE
 def evaluate(rawFile, outputFile, mainFile, rawGPS, maxIter = 10):
     # Iterate through each trajectory
@@ -44,7 +77,7 @@ def evaluate(rawFile, outputFile, mainFile, rawGPS, maxIter = 10):
     dataList = []
     for i in range(numTrajectories):
         if i == maxIter: break
-        print(f'Processing trajectory {i + 1}/{numTrajectories}')
+        print(f'===== Processing trajectory {i + 1}/{numTrajectories} =====')
         exportTrajectories(rawFile, rawGPS, i)
         
         try:
@@ -56,7 +89,7 @@ def evaluate(rawFile, outputFile, mainFile, rawGPS, maxIter = 10):
         rawTrajectory = np.genfromtxt(outputFile, skip_header = 1)
         trajectory = LineString([Point(item) for item in rawTrajectory])
         dataList.append({ 'geometry': trajectory })
-    print()
+        print()
 
     return gpd.GeoDataFrame(
         data = dataList,
@@ -64,17 +97,25 @@ def evaluate(rawFile, outputFile, mainFile, rawGPS, maxIter = 10):
         crs = 'EPSG:32648'
     )
 
+def getArcLength(poly):
+    return np.sum(np.sqrt(np.sum(np.diff(poly, axis=0)**2, axis=1)))
+
 def calculateMetrics (matched, true):
     matchedData, trueData = np.array(matched.coords), np.array(true.coords)
     frechet = similaritymeasures.frechet_dist(matchedData, trueData)
     dtw, _ = similaritymeasures.dtw(matchedData, trueData)
+    dtwNormalized = dtw / (len(matchedData) + len(trueData))
     area = similaritymeasures.area_between_two_curves(matchedData, trueData)
-    return frechet, dtw, area
+    avgLength = (getArcLength(matchedData) + getArcLength(trueData)) / 2
+    areaNormalized = area / avgLength
+    return frechet, dtwNormalized, areaNormalized
+
 
 def printList (nparr):
     print(f'- SUM: {np.sum(nparr) / len(nparr)}')
     print(f'- MIN: {np.min(nparr)}')
     print(f'- MAX: {np.max(nparr)}')
+
 
 def compare (matchedGPS, trueGPS):
     frechetList, DTWList, areaList = [], [], []
@@ -86,11 +127,13 @@ def compare (matchedGPS, trueGPS):
 
     print('Frechet distance:')
     printList(np.array(frechetList))
-    print('Dynamic time warping:')
+    print('Dynamic time warping (normalized):')
     printList(np.array(DTWList))
-    print('Area')
+    print('Area (normalized):')
     printList(np.array(areaList))
 
+
+# VISUALIZE THE FIRST RESULT ENTRY
 def visualizeFirst (edges, matchedGPS, trueGPS):
     matchedGPS, trueGPS = matchedGPS[:1], trueGPS[:1]
     fig, ax = plt.subplots(1, 1, figsize=(20, 24))
@@ -107,18 +150,19 @@ def visualizeFirst (edges, matchedGPS, trueGPS):
     ax.legend(loc='lower left')
     plt.show()
 
+
 print('Starting reading data...')
 nodes = gpd.read_file('./data/processed/map-nodes.gpkg')
 edges = gpd.read_file('./data/processed/map-edges.gpkg')
 trueGPS = gpd.read_file('./data/processed/ground-truths.gpkg')
 rawGPS = gpd.read_file('./data/processed/synthetic-data.gpkg')
 
-print('Exporting graph...')
-# exportGraph('network.txt', nodes, edges)
-print('Evaluating...')
+# print('Exporting graph...')
+# exportGraph('./evaluation/network.bin', nodes, edges)
 
-matchedGPS = evaluate('./evaluation/helper-files/raw-path.txt',
-                      './evaluation/helper-files/matched-path.txt',
+print('Evaluating...')
+matchedGPS = evaluate('./evaluation/raw-path.txt',
+                      './evaluation/matched-path.txt',
                       './map-matching-new.exe',
                       rawGPS, 1)
 

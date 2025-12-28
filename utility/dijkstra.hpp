@@ -74,6 +74,7 @@ vector<int> dijkstra (const Graph &G, int from, int to) {
         }
         if (!vist[to]) return vector<int>(0);
     }
+    // else cout << "Skipped" << endl;
 
     // Trace for edge IDs of the shortest path
     vector<int> edgeID;
