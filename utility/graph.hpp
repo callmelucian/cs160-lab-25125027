@@ -10,12 +10,12 @@ struct Edge {
     double speedLimit;
     Polyline polyline;
 
-    // Constructors
+    // Constructors (speed limits are converted to meters per minute)
     Edge() : from(0), to(0), speedLimit(0) {}
     Edge (int from, int to, double speedLimit, const vector<Point> &container) :
-        from(from), to(to), speedLimit(speedLimit), polyline(container) {}
+        from(from), to(to), speedLimit(speedLimit * 1000.0 / 60.0), polyline(container) {}
     Edge (int from, int to, double speedLimit, const Polyline &init) :
-        from(from), to(to), speedLimit(speedLimit), polyline(init) {}
+        from(from), to(to), speedLimit(speedLimit * 1000.0 / 60.0), polyline(init) {}
     
     // Extract a portion of the polyline using the projection of a Point to itself
     Polyline extract (const Point &p, bool toEnd) { return polyline.extract(p, toEnd); }
@@ -78,7 +78,7 @@ struct Graph {
 
 Graph readGraph (string fileName, string mode) {
     if (mode == "txt") {
-        cout << "Start reading TXT file..." << endl;
+        // cout << "Start reading network..." << endl;
         ifstream fin(fileName);
         int N, M; fin >> N >> M;
         vector<Edge> edges(M);
@@ -95,8 +95,32 @@ Graph readGraph (string fileName, string mode) {
             edges[i] = Edge(u, v, speedLimit, pll);
             isOneway[i] = oneway;
         }
-        cout << "Building graph..." << endl;
+        fin.close();
+        // cout << "Building graph..." << endl;
         return Graph(N, edges, isOneway);
     }
     else return Graph();
+}
+
+vector<CandidatePoint> readTrajectory (string fileName, string mode) {
+    if (mode == "txt") {
+        // cout << "Start reading trajectory..." << endl;
+        ifstream fin(fileName);
+        int K; fin >> K;
+        vector<CandidatePoint> candList(K);
+        for (CandidatePoint &cand : candList)
+            fin >> cand.gps >> cand.recordTime;
+        fin.close();
+        return candList;
+    }
+    return vector<CandidatePoint>(0);
+}
+
+void writeMatchedTrajectory (string fileName, string mode, const Polyline &p) {
+    // cout << "Start writing matched trajectory..." << endl;
+    ofstream fout(fileName);
+    fout << p.size() << "\n";
+    fout << fixed << setprecision(9);
+    for (int i = 0; i < p.size(); i++) fout << p[i].x << " " << p[i].y << "\n";
+    fout.close();
 }

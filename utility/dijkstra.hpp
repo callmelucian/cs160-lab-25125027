@@ -9,6 +9,8 @@ const int shifts[3] = {0, 8, 16};
 char cache[6 * DIJKSTRA_THRESHOLD + 10];
 int trace[DIJKSTRA_NODE], cursor = 0;
 
+/// @brief Read the next 3 bytes on the cache array
+/// @return Return the integer that corresponds to the 3 bytes
 int readNextInt() {
     int value = 0;
     for (int i = 0; i < 3; i++, cursor++)
@@ -16,8 +18,12 @@ int readNextInt() {
     return value;
 }
 
-// SIMPLE DIJKSTRA QUERY THAT RETURNS THE EDGE ID OF
-// THE SHORTEST PATH FROM `FROM` TO `TO`
+/// @brief Simple Dijkstra query between a pair of nodes
+/// @param G Input from
+/// @param from From node ID
+/// @param to To node ID
+/// @param UBODT File path of the UBODT file
+/// @return Return the list of edges' ID on the shorest-path
 vector<int> dijkstra (const Graph &G, int from, int to, string UBODT) {
     // Read the appropriate data from UBODT
     ifstream fin(UBODT, ios::binary);
@@ -79,6 +85,11 @@ vector<int> dijkstra (const Graph &G, int from, int to, string UBODT) {
 
 const string UBODTPath = "../precomputation/UBODT.bin";
 
+/// @brief Compute the shortest path length between 2 candidate points w.r.t. their associated edges
+/// @param G Input graph
+/// @param from Candidate point 1
+/// @param to Candidate point 2
+/// @return Return the shorest path length
 double shortestPathLength (const Graph &G, const CandidatePoint &from, const CandidatePoint &to) {
     // calculate the list of edge IDs
     int fromNode = G.edges[from.assocEdge].to;
@@ -96,6 +107,11 @@ double shortestPathLength (const Graph &G, const CandidatePoint &from, const Can
     return finalPathLength;
 }
 
+/// @brief Compute the shortest path geometry between 2 candidate points w.r.t. their associated edges
+/// @param G Input graph
+/// @param from Candidate point 1
+/// @param to Candidate point 2
+/// @return Return the shortest path geometry
 Polyline shortestPath (const Graph &G, const CandidatePoint &from, const CandidatePoint &to) {
     // calculate the list of edge IDs
     int fromNode = G.edges[from.assocEdge].to;
@@ -113,6 +129,11 @@ Polyline shortestPath (const Graph &G, const CandidatePoint &from, const Candida
     return finalPath;
 }
 
+/// @brief Compute the fastest travel time on the shortest path between 2 candidate points w.r.t their associated edges
+/// @param G Input graph
+/// @param from Candidate 1
+/// @param to Candidate 2
+/// @return Return the fastest travel time in minutes
 double fastTravelTime (const Graph &G, const CandidatePoint &from, const CandidatePoint &to) {
     // calculate the list of edge IDs
     int fromNode = G.edges[from.assocEdge].to;

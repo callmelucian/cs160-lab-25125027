@@ -13,7 +13,7 @@ vector<int> bestScoringPath (const Graph &G, const vector<vector<CandidatePoint>
         if (cands.size() != candList[0].size()) throw invalid_argument("Inconsistent layer size");
     }
     vector<vector<double>> bestScore(candList.size(), vector<double>(candList[0].size(), 0.0));
-    vector<vector<int>> trace(1);
+    vector<vector<int>> trace(candList.size(), vector<int>(candList[0].size(), 0));
 
     // perform dynamic programming
     for (int layer = 1; layer < candList.size(); layer++) {

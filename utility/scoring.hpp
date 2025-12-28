@@ -2,10 +2,15 @@
 #include "dijkstra.hpp"
 using namespace std;
 
+/// @brief Calculate the normal-distribution function exp(-gap^2 / (2 * variance))
+/// @param gap Actual gap
+/// @param variance Expected gap
+/// @return The value of the mentioned function
 double normalDistribution (double gap, double variance) {
     return exp(-squared(gap) / (2 * squared(variance)));
 }
 
+/// @brief Compute spartial analysis functions
 namespace spatial {
     const double stdDeviation = 50;
 
@@ -28,6 +33,7 @@ namespace spatial {
     }
 };
 
+/// @brief Compute temporal analysis functions
 namespace temporal {
     const double largeVariance = 30;
     const double smallVariance = 5;
@@ -41,6 +47,11 @@ namespace temporal {
     }
 };
 
+/// @brief Calculate the scoring of moving between 2 candidate points according to the paper
+/// @param G Input graph
+/// @param from Starting candidate point
+/// @param to Ending candidate point
+/// @return The scoring according to the paper
 double SPFunction (const Graph &G, const CandidatePoint &from, const CandidatePoint &to) {
     return spatial::score(G, from, to) * temporal::score(G, from, to); // combining spatial & temporal analysis function
 }

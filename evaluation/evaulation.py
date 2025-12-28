@@ -1,6 +1,7 @@
 import similaritymeasures
 import numpy as np
 from shapely.geometry import LineString, Point
+import matplotlib.pyplot as plt
 from tqdm import tqdm
 import subprocess
 import os
@@ -89,16 +90,39 @@ def compare (matchedGPS, trueGPS):
     print('Area')
     printList(np.array(areaList))
 
+def visualizeFirst (edges, matchedGPS, trueGPS):
+    matchedGPS, trueGPS = matchedGPS[:1], trueGPS[:1]
+    fig, ax = plt.subplots(1, 1, figsize=(20, 24))
+    edges.plot(ax = ax, color = 'lightgray', linewidth = 1, label = 'Road edges', zorder = 1)
+    trueGPS.plot(ax = ax, color = 'green', linewidth = 2, label = 'True GPS (provided data)', zorder = 2)
+    matchedGPS.plot(ax = ax, color = 'red', linewidth = 2, label = 'Matched GPS', zorder = 4)
+
+    minx, miny, maxx, maxy = trueGPS.total_bounds
+    buffer = 100
+    ax.set_xlim(minx - buffer, maxx + buffer)
+    ax.set_ylim(miny - buffer, maxy + buffer)
+
+    ax.set_title('Visualize Map Matching Result')
+    ax.legend(loc='lower left')
+    plt.show()
+
 print('Starting reading data...')
-nodes = gpd.read_file('../data/processed/map-nodes.gpkg')
-edges = gpd.read_file('../data/processed/map-edges.gpkg')
-trueGPS = gpd.read_file('../data/processed/ground-truths.gpkg')
-rawGPS = gpd.read_file('../data/processed/raw-trajectory.gpkg')
+nodes = gpd.read_file('./data/processed/map-nodes.gpkg')
+edges = gpd.read_file('./data/processed/map-edges.gpkg')
+trueGPS = gpd.read_file('./data/processed/ground-truths.gpkg')
+rawGPS = gpd.read_file('./data/processed/raw-trajectory.gpkg')
 
 print('Exporting graph...')
 # exportGraph('network.txt', nodes, edges)
 print('Evaluating...')
-matchedGPS = evaluate('raw-path.txt', 'matched-path.txt', 'sample-mm.exe', rawGPS, 200)
+
+matchedGPS = evaluate('./evaluation/helper-files/raw-path.txt',
+                      './evaluation/helper-files/matched-path.txt',
+                      './evaluation/map-matching-new/map-matching-new.exe',
+                      rawGPS, 1)
+
+print('Visualizing...')
+visualizeFirst(edges, matchedGPS, trueGPS)
 
 # print(f'Found this matched GPS {len(matchedGPS)}')
 # print(matchedGPS)
