@@ -35,8 +35,8 @@ namespace spatial {
 
 /// @brief Compute temporal analysis functions
 namespace temporal {
-    const double largeVariance = 30;
-    const double smallVariance = 5;
+    const double largeVariance = 40;
+    const double smallVariance = 20;
 
     long double score (const Graph &G, const CandidatePoint &from, const CandidatePoint &to) {
         long double timeLimit = fastTravelTime(G, from, to);

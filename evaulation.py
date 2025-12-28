@@ -39,7 +39,7 @@ def exportTrajectories(rawFile, rawGPS, index):
 def evaluate(rawFile, outputFile, mainFile, rawGPS, maxIter = 10):
     # Iterate through each trajectory
     numTrajectories = len(rawGPS)
-    print(f'Starting evaluation of {numTrajectories} trajectories...')
+    print(f'Starting evaluation of {numTrajectories} trajectories...\n')
 
     dataList = []
     for i in range(numTrajectories):
@@ -56,6 +56,7 @@ def evaluate(rawFile, outputFile, mainFile, rawGPS, maxIter = 10):
         rawTrajectory = np.genfromtxt(outputFile, skip_header = 1)
         trajectory = LineString([Point(item) for item in rawTrajectory])
         dataList.append({ 'geometry': trajectory })
+    print()
 
     return gpd.GeoDataFrame(
         data = dataList,
@@ -93,9 +94,9 @@ def compare (matchedGPS, trueGPS):
 def visualizeFirst (edges, matchedGPS, trueGPS):
     matchedGPS, trueGPS = matchedGPS[:1], trueGPS[:1]
     fig, ax = plt.subplots(1, 1, figsize=(20, 24))
-    edges.plot(ax = ax, color = 'lightgray', linewidth = 1, label = 'Road edges', zorder = 3)
-    trueGPS.plot(ax = ax, color = 'green', linewidth = 2, label = 'True GPS (provided data)', zorder = 1)
-    matchedGPS.plot(ax = ax, color = 'red', linewidth = 2, label = 'Matched GPS', zorder = 2)
+    edges.plot(ax = ax, color = 'lightgray', linewidth = 1, label = 'Road edges', zorder = 1)
+    trueGPS.plot(ax = ax, color = 'green', linewidth = 4, label = 'True GPS (provided data)', zorder = 2)
+    matchedGPS.plot(ax = ax, color = 'red', linewidth = 2, label = 'Matched GPS', zorder = 3)
 
     minx, miny, maxx, maxy = trueGPS.total_bounds
     buffer = 100
