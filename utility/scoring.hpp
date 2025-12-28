@@ -2,12 +2,16 @@
 #include "dijkstra.hpp"
 using namespace std;
 
+double normalDistribution (double gap, double variance) {
+    return exp(-squared(gap) / (2 * squared(variance)));
+}
+
 namespace spatial {
     const double stdDeviation = 50;
 
     double observationProbability (const Graph &G, const CandidatePoint &cp) {
         double distanc = euclideDist(G.edges[cp.assocEdge].polyline, cp.gps), scalar = 1.0;
-        double expo = exp(-squared(distanc) / (2 * squared(stdDeviation)));
+        double expo = normalDistribution(distanc, stdDeviation);
         return scalar * expo;
     }
 
@@ -25,19 +29,18 @@ namespace spatial {
 };
 
 namespace temporal {
+    const double largeVariance = 30;
+    const double smallVariance = 5;
+
     double score (const Graph &G, const CandidatePoint &from, const CandidatePoint &to) {
         double timeLimit = fastTravelTime(G, from, to);
         double actualTime = to.recordTime - from.recordTime;
-        return 1.0;
+        if (actualTime < timeLimit)
+            return normalDistribution(timeLimit - actualTime, largeVariance);
+        return normalDistribution(actualTime - timeLimit, smallVariance);
     }
-
-    /**
-     * TODO: use exp(- square(actualTime - timeLimit) / (2 * square(variance)))
-     * but there is 2 different variance for each case, I'm expecting something like
-     * variance is greater if actualTime is greater than timeLimit
-     */
 };
 
 double SPFunction (const Graph &G, const CandidatePoint &from, const CandidatePoint &to) {
-    return spatial::score(G, from, to) * temporal::score(G, from, to);
+    return spatial::score(G, from, to) * temporal::score(G, from, to); // combining spatial & temporal analysis function
 }
