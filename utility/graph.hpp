@@ -10,12 +10,12 @@ struct Edge {
     double speedLimit;
     Polyline polyline;
 
-    // Constructors (speed limits are converted to meters per minute)
+    // Constructors
     Edge() : from(0), to(0), speedLimit(0) {}
     Edge (int from, int to, double speedLimit, const vector<Point> &container) :
-        from(from), to(to), speedLimit(speedLimit * 1000.0 / 60.0), polyline(container) {}
+        from(from), to(to), speedLimit(speedLimit), polyline(container) {}
     Edge (int from, int to, double speedLimit, const Polyline &init) :
-        from(from), to(to), speedLimit(speedLimit * 1000.0 / 60.0), polyline(init) {}
+        from(from), to(to), speedLimit(speedLimit), polyline(init) {}
     
     // Extract a portion of the polyline using the projection of a Point to itself
     Polyline extract (const Point &p, bool toEnd) { return polyline.extract(p, toEnd); }
@@ -92,7 +92,7 @@ Graph readGraph (string fileName, string mode) {
             vector<Point> pll(polylength);
             for (Point &it : pll) fin >> it;
 
-            edges[i] = Edge(u, v, speedLimit, pll);
+            edges[i] = Edge(u, v, speedLimit * 1000.0 / 60.0, pll);
             isOneway[i] = oneway;
         }
         fin.close();

@@ -93,9 +93,9 @@ def compare (matchedGPS, trueGPS):
 def visualizeFirst (edges, matchedGPS, trueGPS):
     matchedGPS, trueGPS = matchedGPS[:1], trueGPS[:1]
     fig, ax = plt.subplots(1, 1, figsize=(20, 24))
-    edges.plot(ax = ax, color = 'lightgray', linewidth = 1, label = 'Road edges', zorder = 1)
-    trueGPS.plot(ax = ax, color = 'green', linewidth = 2, label = 'True GPS (provided data)', zorder = 2)
-    matchedGPS.plot(ax = ax, color = 'red', linewidth = 2, label = 'Matched GPS', zorder = 4)
+    edges.plot(ax = ax, color = 'lightgray', linewidth = 1, label = 'Road edges', zorder = 3)
+    trueGPS.plot(ax = ax, color = 'green', linewidth = 2, label = 'True GPS (provided data)', zorder = 1)
+    matchedGPS.plot(ax = ax, color = 'red', linewidth = 2, label = 'Matched GPS', zorder = 2)
 
     minx, miny, maxx, maxy = trueGPS.total_bounds
     buffer = 100
@@ -110,7 +110,7 @@ print('Starting reading data...')
 nodes = gpd.read_file('./data/processed/map-nodes.gpkg')
 edges = gpd.read_file('./data/processed/map-edges.gpkg')
 trueGPS = gpd.read_file('./data/processed/ground-truths.gpkg')
-rawGPS = gpd.read_file('./data/processed/raw-trajectory.gpkg')
+rawGPS = gpd.read_file('./data/processed/synthetic-data.gpkg')
 
 print('Exporting graph...')
 # exportGraph('network.txt', nodes, edges)

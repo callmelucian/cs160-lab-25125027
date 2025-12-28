@@ -1,5 +1,5 @@
 #include <bits/stdc++.h>
-#include "../utility/dijkstra.hpp"
+#include "utility/dijkstra.hpp"
 using namespace std;
 
 using ll = long long;
@@ -47,10 +47,10 @@ int main()
     ios::sync_with_stdio(0);
     cin.tie(0);
 
-    Graph G = readGraph("../evaluation/network.txt", "txt");
+    Graph G = readGraph("evaluation/helper-files/network.txt", "txt");
     cout << "Found " << G.edgeCount() << " edges, " << G.size() << " nodes" << endl;
 
-    ifstream fin("../evaluation/raw-path.txt");
+    ifstream fin("evaluation/helper-files/raw-path.txt");
     cout << "Start reading raw path..." << endl;
     int k; fin >> k;
     vector<CandidatePoint> rawPath(k);
@@ -71,11 +71,24 @@ int main()
     for (int i = 0; i + 1 < rawPath.size(); i++) {
         double trueValue = trueDijkstra(G, rawPath[i], rawPath[i + 1]);
         double compValue = shortestPathLength(G, rawPath[i], rawPath[i + 1]);
+        vector<int> edgeID = dijkstra(G, G.edges[rawPath[i].assocEdge].to, G.edges[rawPath[i + 1].assocEdge].from);
+
         if (abs(trueValue - compValue) < eps)
             cout << "Okay " << trueValue << " " << compValue << endl;
         else {
             cout << "Wrong answer " << i << "\n";
-            cout << trueValue << " " << compValue << "\n";
+            cout << "Expected " << trueValue << ", found " << compValue << "\n";
+            cout << "Edge ID: ";
+            for (int u : edgeID) cout << u << " ";
+            cout << "\n";
+
+            // assert(G.edges[rawPath[i].assocEdge].to == G.edges[edgeID.front()].from);
+            // assert(G.edges[edgeID.back()].to == G.edges[rawPath[i + 1].assocEdge].from);
+
+            // for (int i = 1; i < edgeID.size(); i++)
+            //     assert(G.edges[edgeID[i - 1]].to == G.edges[edgeID[i]].from);
+
+            exit(0);
         }
     }
 

@@ -11,7 +11,7 @@ using tpl = tuple<int,int,int>;
 #define all(a) a.begin(), a.end()
 #define filter(a) a.erase(unique(all(a)), a.end())
 
-const int MAXCANDIDATE = 20;
+const int MAXCANDIDATE = 8;
 
 int main()
 {
@@ -32,10 +32,22 @@ int main()
     vector<vector<CandidatePoint>> candList = findCandidates(G, trajectory, MAXCANDIDATE);
     cout << "Done!" << endl;
 
+    // cout << "\n";
+    // for (int i = 0; i < candList.size(); i++) {
+    //     cout << "Layer " << i << ": ";
+    //     for (CandidatePoint pt : candList[i]) cout << "(" << pt.gps << "/" << pt.assocEdge << ") ";
+    //     cout << "\n";
+    // }
+    // cout << "\n";
+
     /// Find the optimal path on the virtual graph
     cout << "Finding optimal path..." << endl;
     vector<int> optimalPath = bestScoringPath(G, candList);
     cout << "Done!" << endl;
+
+    // cout << "Optimal path: ";
+    // for (int u : optimalPath) cout << u << " ";
+    // cout << "\n";
 
     /// Find the geometry of the optimal path
     cout << "Finding the geometry of the optimal path..." << endl;
@@ -43,6 +55,11 @@ int main()
     for (int i = 0; i + 1 < optimalPath.size(); i++) {
         CandidatePoint prv = candList[i][optimalPath[i]], nxt = candList[i + 1][optimalPath[i + 1]];
         ans += shortestPath(G, prv, nxt);
+        // vector<int> edgeIDs = dijkstra(G, G.edges[prv.assocEdge].to, G.edges[nxt.assocEdge].from);
+        // cout << "Path " << i + 1 << ": ";
+        // for (int u : edgeIDs) cout << u << " ";
+        // cout << "\n";
+        
     }
     cout << "Done!" << endl;
 

@@ -71,18 +71,23 @@ int main()
     ios::sync_with_stdio(0);
     cin.tie(0);
 
-    Graph G = readGraph("../evaluation/network.txt", "txt");
+    Graph G = readGraph("../evaluation/helper-files/network.txt", "txt");
     cout << "Received graph with " << G.size() << " nodes and " << G.edgeCount() << " edges" << endl;
 
     cout << "Running Dijkstra..." << endl;
     for (int i = 1; i <= G.size(); i++) resetNode(i);
     
+    ofstream fout("UBODT.bin", ios::binary | ios::trunc);
+    fout.close();
+
     for (int source = 1; source <= G.size(); source++) {
         if (source % 2000 == 0) {
             cout << "Checkpoint: " << source << "-th node..." << endl;
         }
         vector<int> nodeList = runDijkstra(source, G);
         prepareBinaryFile(nodeList, "UBODT.bin", source);
+
+        for (int u : nodeList) assert(!u || G.edges[trace[u]].to == u);
 
         for (int u : toReset) resetNode(u);
         resetNode(source), toReset.clear();

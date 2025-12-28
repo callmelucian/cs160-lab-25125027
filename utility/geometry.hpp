@@ -12,7 +12,7 @@ const double eps = 1e-6;
 const double oo = 1e9;
 
 // HELPER FUNCTIONS
-double squared (double a) { return a * a; }
+long double squared (long double a) { return a * a; }
 
 // POINT STRUCT TO REPRESENT 2D POINTS AND VECTORS
 struct Point {

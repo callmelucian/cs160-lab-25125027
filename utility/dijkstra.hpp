@@ -2,6 +2,7 @@
 #include "../utility/graph.hpp"
 using namespace std;
 
+const string UBODTPath = "precomputation/UBODT.bin";
 const int DIJKSTRA_THRESHOLD = 75;
 const int DIJKSTRA_NODE = 2e5 + 5;
 const int shifts[3] = {0, 8, 16};
@@ -24,9 +25,9 @@ int readNextInt() {
 /// @param to To node ID
 /// @param UBODT File path of the UBODT file
 /// @return Return the list of edges' ID on the shorest-path
-vector<int> dijkstra (const Graph &G, int from, int to, string UBODT) {
+vector<int> dijkstra (const Graph &G, int from, int to) {
     // Read the appropriate data from UBODT
-    ifstream fin(UBODT, ios::binary);
+    ifstream fin(UBODTPath, ios::binary);
     fin.seekg(6 * DIJKSTRA_THRESHOLD * (from - 1), ios::beg);
     fin.read(cache, 6 * DIJKSTRA_THRESHOLD);
     fin.close();
@@ -71,6 +72,7 @@ vector<int> dijkstra (const Graph &G, int from, int to, string UBODT) {
                 }
             }
         }
+        if (!vist[to]) return vector<int>(0);
     }
 
     // Trace for edge IDs of the shortest path
@@ -83,8 +85,6 @@ vector<int> dijkstra (const Graph &G, int from, int to, string UBODT) {
     return edgeID;
 }
 
-const string UBODTPath = "../precomputation/UBODT.bin";
-
 /// @brief Compute the shortest path length between 2 candidate points w.r.t. their associated edges
 /// @param G Input graph
 /// @param from Candidate point 1
@@ -94,7 +94,7 @@ double shortestPathLength (const Graph &G, const CandidatePoint &from, const Can
     // calculate the list of edge IDs
     int fromNode = G.edges[from.assocEdge].to;
     int toNode = G.edges[to.assocEdge].from;
-    vector<int> edgeIDs = dijkstra(G, fromNode, toNode, UBODTPath);
+    vector<int> edgeIDs = dijkstra(G, fromNode, toNode);
     if (edgeIDs.empty() && fromNode != toNode) return oo;
     double finalPathLength = 0;
 
@@ -116,7 +116,7 @@ Polyline shortestPath (const Graph &G, const CandidatePoint &from, const Candida
     // calculate the list of edge IDs
     int fromNode = G.edges[from.assocEdge].to;
     int toNode = G.edges[to.assocEdge].from;
-    vector<int> edgeIDs = dijkstra(G, fromNode, toNode, UBODTPath);
+    vector<int> edgeIDs = dijkstra(G, fromNode, toNode);
     if (edgeIDs.empty() && fromNode != toNode) return Polyline();
     Polyline finalPath;
 
@@ -138,7 +138,7 @@ double fastTravelTime (const Graph &G, const CandidatePoint &from, const Candida
     // calculate the list of edge IDs
     int fromNode = G.edges[from.assocEdge].to;
     int toNode = G.edges[to.assocEdge].from;
-    vector<int> edgeIDs = dijkstra(G, fromNode, toNode, UBODTPath);
+    vector<int> edgeIDs = dijkstra(G, fromNode, toNode);
     if (edgeIDs.empty() && fromNode != toNode) return oo;
     double res = 0.0;
 

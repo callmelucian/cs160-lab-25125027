@@ -7,6 +7,18 @@ int main()
     ios::sync_with_stdio(0);
     cin.tie(0);
 
+    vector<int> v1 = {1, 2, 3, 4, 10, 11};
+    vector<int> v2 = {6, 7, 8, 9, 10};
+    v1.insert(v1.end(), v2.begin(), v2.end());
+    v2[0] = 100;
+
+    for (int u : v1) cout << u << " ";
+    cout << "\n";
+    for (int u : v2) cout << u << " ";
+    cout << "\n";
+
+    return 0;
+
     cout << "FIRST UNIT TEST:\n";
     Polyline path({Point(1.5, 0.0), Point(2.0, 1.0), Point(0.0, -1.0), Point(0.5, -0.5)});
     cout << path.length() << "\n";
